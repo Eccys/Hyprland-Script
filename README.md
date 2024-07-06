@@ -33,7 +33,7 @@
 > [!IMPORTANT]
 > If you wish to use nouveau's drivers, choose N when prompted to install nvidia drivers. Else, the nvidia installer will blacklist nouveau. Hyprland will still be installed, but it will not blacklist nouveau.
 
-## ✨ How to use this script
+### ✨ How to use this script
 > Clone this repository.
 > Change your directory.
 > Make `install.sh` executable.
