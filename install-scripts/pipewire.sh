@@ -24,7 +24,7 @@ source "$(dirname "$(readlink -f "$0")")/Global_functions.sh"
 # Set the name of the log file to include the current date and time
 LOG="Install-Logs/install-$(date +%d-%H%M%S)_pipewire.log"
 
-ISAUR=$(command -v yay || command -v paru)
+ISAUR=$(command -v yay || command -v paru || true)
 
 # Removal of pulseaudio
 printf "${YELLOW}Removing pulseaudio stuff...${RESET}\n"
@@ -33,7 +33,7 @@ for pulseaudio in pulseaudio pulseaudio-alsa pulseaudio-bluetooth; do
 done
 
 # Disabling pulseaudio to avoid conflicts
-systemctl --user disable --now pulseaudio.socket pulseaudio.service 2>/dev/null && tee -a "$LOG"
+systemctl --user disable --now pulseaudio.socket pulseaudio.service 2>&1 | tee -a "$LOG" || true
 
 # Pipewire
 printf "${NOTE} Installing Pipewire Packages...\n"

@@ -51,6 +51,7 @@ while true; do
         break  # Break out of the loop if 'no' is chosen
     else
         echo "${ERROR} Invalid choice. Please enter 'y' for yes or 'n' for no."
+        input_group_choid=""
     fi
 done
 

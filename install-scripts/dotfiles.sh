@@ -35,7 +35,7 @@ if [[ -f dotfiles.tar.gz ]]; then
     if [[ -z "$upgrade_choice" ]]; then
       read -p "Do you want to upgrade to the latest version? (y/n): " upgrade_choice
     fi
-    if [[ "$upgrade_choice" == "y" ]]; then
+    if [[ "$upgrade_choice" =~ ^[Yy]$ ]]; then
       echo "${NOTE} Proceeding to download the latest release." | tee -a "../Install-Logs/install-$(date +'%d-%H%M%S')_dotfiles.log"
       
       # Delete existing directories starting with Eccys-dotfiles

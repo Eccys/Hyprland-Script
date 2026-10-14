@@ -4,7 +4,7 @@
 
 # Check if running as root. If root, script will exit
 if [[ $EUID -eq 0 ]]; then
-    echo "Error: running as root.\nExiting..."
+    printf "Error: running as root.\nExiting...\n"
     exit 1
 fi
 
@@ -95,7 +95,7 @@ ask_yes_no() {
         case "$choice" in
             [Yy]* ) eval "$2='Y'"; return 0;;
             [Nn]* ) eval "$2='N'"; return 1;;
-            * ) echo "Please enter "Y" for yes, or "N" for no.";;
+            * ) echo "Please enter \"Y\" for yes, or \"N\" for no.";;
         esac
     done
 }
@@ -105,6 +105,8 @@ ask_custom_option() {
     local prompt="$1"
     local valid_options="$2"
     local response_var="$3"
+    local normalized_options="${valid_options#*: }"
+    normalized_options="${normalized_options//,/ }"
 
     if [[ ! -z "${!3}" ]]; then
       return 0
@@ -114,7 +116,7 @@ ask_custom_option() {
 
     while true; do
         read -p "$(colorize_prompt "$CAT"  "$prompt ($valid_options): ")" choice
-        if [[ " $valid_options " == *" $choice "* ]]; then
+        if [[ -n "$choice" && " $normalized_options " == *" $choice "* ]]; then
             eval "$response_var='$choice'"
             return 0
         else
