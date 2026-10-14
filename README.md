@@ -40,7 +40,7 @@
 > Run `install.sh`.
 
 ```bash
-git clone --depth=1 https://github.com/JaKooLit/Arch-Hyprland.git ~/Hyprland-Script
+git clone --depth=1 https://github.com/Eccys/Hyprland-Script.git ~/Hyprland-Script
 cd ~/Hyprland-Script
 chmod +x install.sh
 ./install.sh
@@ -69,7 +69,7 @@ fish
 
 ### 🔧 Installing a particular script from install-scripts.
 - Change your directory to `~/Hyprland-Script/install-scripts` and execute your script of choice.
-- For example, `./install-scripts/gtk-themes` will reinstall GTK Themes.
+- For example, `./install-scripts/gtk_themes.sh` will reinstall GTK Themes.
 
 ### 🛣️ Roadmap:
 - [x] Install fish and oh-my-fish/fisher without necessary steps above. 

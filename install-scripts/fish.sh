@@ -42,6 +42,7 @@ while true; do
             ;;
         *)
             echo "${WARN}Please enter 'y' for yes or 'n' for no.${RESET}"
+            pokemon_choice=""
             ;;
     esac
 done
@@ -80,6 +81,7 @@ if command -v fish >/dev/null; then
 	fi
 	
 	# Copying the preconfigured fish themes and profile
+    mkdir -p "$HOME/.config/fish"
     cp -r 'assets/config.fish' ~/.config/fish/
     cp -r 'assets/fish_plugins' ~/.config/fish/
 
