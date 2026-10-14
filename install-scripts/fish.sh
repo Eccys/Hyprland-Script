@@ -1,6 +1,13 @@
 #!/bin/bash
 # Made by Ecys — https://ecys.xyz
 # fish and oh my fish including pokemon-color-scripts#
+# Determine the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Change the working directory to the parent directory of the script
+PARENT_DIR="$SCRIPT_DIR/.."
+cd "$PARENT_DIR" || exit 1
+
 if [[ $USE_PRESET = [Yy] ]]; then
   source ./preset.sh
 fi
@@ -13,13 +20,6 @@ fzf
 
 
 ## WARNING: DO NOT EDIT BEYOND THIS LINE IF YOU DON'T KNOW WHAT YOU ARE DOING! ##
-# Determine the directory where the script is located
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-# Change the working directory to the parent directory of the script
-PARENT_DIR="$SCRIPT_DIR/.."
-cd "$PARENT_DIR" || exit 1
-
 source "$(dirname "$(readlink -f "$0")")/Global_functions.sh"
 
 # Set the name of the log file to include the current date and time
@@ -33,7 +33,9 @@ while true; do
     case "$pokemon_choice" in
         [Yy]*)
             fish_packages+=('pokemon-colorscripts-git')
-            sed -i '/#pokemon-colorscripts --no-title -s -r/s/^#//' assets/config.fish
+            if [ -f assets/config.fish ]; then
+                sed -i '/#pokemon-colorscripts --no-title -s -r/s/^#//' assets/config.fish
+            fi
             break
             ;;
         [Nn]*)
@@ -68,11 +70,11 @@ if command -v fish >/dev/null; then
 	# Install Oh My Fish plugins
 	fish -c "fisher install jorgebucaran/fisher" || true
 
-	# Check if the directories exist before cloning the repositories
-	if [ ! -d "$HOME/.config/fish/functions/fish_prompt.fish" ]; then
+	# Check if fish_prompt.fish exists before installing fish-prompt-metro
+	if [ ! -f "$HOME/.config/fish/functions/fish_prompt.fish" ]; then
     	fish -c "fisher install jorgebucaran/fish-prompt-metro" || true
 	else
-    	echo "Directory fish-prompt already exists. Skipping cloning." 2>&1 | tee -a "$LOG"
+    	echo "File fish_prompt.fish already exists. Skipping installation." 2>&1 | tee -a "$LOG"
 	fi
 	
 	# Check if config.fish exists, create a backup, and copy the new configuration
@@ -82,8 +84,8 @@ if command -v fish >/dev/null; then
 	
 	# Copying the preconfigured fish themes and profile
     mkdir -p "$HOME/.config/fish"
-    cp -r 'assets/config.fish' ~/.config/fish/
-    cp -r 'assets/fish_plugins' ~/.config/fish/
+    [ -f "assets/config.fish" ] && cp -r "assets/config.fish" "$HOME/.config/fish/"
+    [ -f "assets/fish_plugins" ] && cp -r "assets/fish_plugins" "$HOME/.config/fish/"
 
     printf "${NOTE} Changing default shell to fish...\n"
 
