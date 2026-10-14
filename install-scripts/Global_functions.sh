@@ -41,7 +41,7 @@ install_package_pacman() {
 }
 
 
-ISAUR=$(command -v yay || command -v paru)
+ISAUR=$(command -v yay || command -v paru || true)
 
 # Function for installing packages
 install_package() {

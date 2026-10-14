@@ -48,6 +48,7 @@ else
     echo "$ERROR Download failed for GTK themes and Icons.." 2>&1 | tee -a "$LOG"
 fi
 
+mkdir -p ~/.icons
 tar -xf "assets/Bibata-Modern-Ice.tar.xz" -C ~/.icons 2>&1 | tee -a "$LOG"
 echo "$OK Extracted Bibata-Modern-Ice.tar.xz to ~/.icons folder." 2>&1 | tee -a "$LOG"
 
