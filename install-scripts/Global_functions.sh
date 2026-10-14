@@ -2,7 +2,7 @@
 # Made by Ecys — https://ecys.xyz
 # Global Functions for Scripts #
 
-set -e
+set -eo pipefail
 
 # Set some colors for output messages
 OK="$(tput setaf 2)[OK]$(tput sgr0)"
@@ -17,7 +17,7 @@ RESET=$(tput sgr0)
 
 # Create Directory for Install Logs
 if [ ! -d Install-Logs ]; then
-    mkdir Install-Logs
+    mkdir -p Install-Logs
 fi
 
 # Function for installing packages
@@ -45,15 +45,22 @@ ISAUR=$(command -v yay || command -v paru || true)
 
 # Function for installing packages
 install_package() {
+  if [ -z "$ISAUR" ]; then
+    ISAUR=$(command -v yay || command -v paru || true)
+  fi
+  if [ -z "$ISAUR" ]; then
+    install_package_pacman "$1"
+    return
+  fi
   # Checking if package is already installed
-  if $ISAUR -Q "$1" &>> /dev/null ; then
+  if "$ISAUR" -Q "$1" &>> /dev/null ; then
     echo -e "${OK} $1 is already installed. Skipping..."
   else
     # Package not installed
     echo -e "${NOTE} Installing $1 ..."
-    $ISAUR -S --noconfirm "$1" 2>&1 | tee -a "$LOG"
+    "$ISAUR" -S --noconfirm "$1" 2>&1 | tee -a "$LOG"
     # Making sure package is installed
-    if $ISAUR -Q "$1" &>> /dev/null ; then
+    if "$ISAUR" -Q "$1" &>> /dev/null ; then
       echo -e "\e[1A\e[K${OK} $1 was installed."
     else
       # Something is missing, exiting to review log
