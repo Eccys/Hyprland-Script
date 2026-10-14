@@ -2,6 +2,11 @@
 # Made by Ecys — https://ecys.xyz
 #
 # dotfiles to download from Releases #
+# Determine the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PARENT_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
+cd "$PARENT_DIR" || exit 1
+
 if [[ "${USE_PRESET,,}" == "y" ]]; then
   source ./preset.sh
 fi
@@ -9,6 +14,7 @@ fi
 ## WARNING: DO NOT EDIT BEYOND THIS LINE IF YOU DON'T KNOW WHAT YOU ARE DOING! ##
 
 source "$(dirname "$(readlink -f "$0")")/Global_functions.sh"
+LOG="$PARENT_DIR/Install-Logs/install-$(date +'%d-%H%M%S')_dotfiles.log"
 
 printf "${NOTE} Downloading / Checking for existing dotfiles.tar.gz...\n"
 
@@ -16,14 +22,14 @@ printf "${NOTE} Downloading / Checking for existing dotfiles.tar.gz...\n"
 if [[ -f dotfiles.tar.gz ]]; then
   printf "${NOTE} Existing dotfiles found.\n"
 
-  # Get the version from the existing tarball filename
-  existing_version=$(tar -tf dotfiles.tar.gz | grep -oP 'v\d+\.\d+\.\d+' | sed 's/v//')
+  # Get the version from the existing tarball contents
+  existing_version=$(tar -tf dotfiles.tar.gz | grep -oP 'v\d+\.\d+\.\d+' | head -n1 | sed 's/v//' || true)
 
   # Fetch the tag_name for the latest release using the GitHub API
-  latest_version=$(curl -s https://api.github.com/repos/Eccys/dotfiles/releases/latest | grep "tag_name" | cut -d '"' -f 4 | sed 's/v//')
+  latest_version=$(curl -s https://api.github.com/repos/Eccys/dotfiles/releases/latest | grep "tag_name" | cut -d '"' -f 4 | sed 's/v//' || true)
 
   # Check if versions match
-  if [[ "$existing_version" == "$latest_version" ]]; then
+  if [[ -n "$existing_version" && "$existing_version" == "$latest_version" ]]; then
     echo "${OK} dotfiles.tar.gz is up-to-date with the latest release ($latest_version)."
     
     # Sleep for 10 seconds before exiting
@@ -36,14 +42,14 @@ if [[ -f dotfiles.tar.gz ]]; then
       read -p "Do you want to upgrade to the latest version? (y/n): " upgrade_choice
     fi
     if [[ "$upgrade_choice" =~ ^[Yy]$ ]]; then
-      echo "${NOTE} Proceeding to download the latest release." | tee -a "../Install-Logs/install-$(date +'%d-%H%M%S')_dotfiles.log"
+      echo "${NOTE} Proceeding to download the latest release." | tee -a "$LOG"
       
       # Delete existing directories starting with Eccys-dotfiles
       find . -type d -name 'Eccys-dotfiles*' -exec rm -rf {} +
       rm -f dotfiles.tar.gz
       printf "${WARN} Removed existing dotfiles.tar.gz.\n"
     else
-      echo "${NOTE} User chose not to upgrade. Exiting..." | tee -a "../Install-Logs/install-$(date +'%d-%H%M%S')_dotfiles.log"
+      echo "${NOTE} User chose not to upgrade. Exiting..." | tee -a "$LOG"
       exit 0
     fi
   fi
@@ -52,20 +58,20 @@ fi
 printf "${NOTE} Downloading the latest Hyprland source code release...\n"
 
 # Fetch the tag name for the latest release using the GitHub API
-latest_tag=$(curl -s https://api.github.com/repos/Eccys/dotfiles/releases/latest | grep "tag_name" | cut -d '"' -f 4)
+latest_tag=$(curl -s https://api.github.com/repos/Eccys/dotfiles/releases/latest | grep "tag_name" | cut -d '"' -f 4 || true)
 
 # Check if the tag is obtained successfully
 if [[ -z "$latest_tag" ]]; then
-  echo "${ERROR} Unable to fetch the latest tag information." | tee -a "../Install-Logs/install-$(date +'%d-%H%M%S')_dotfiles.log"
+  echo "${ERROR} Unable to fetch the latest tag information." | tee -a "$LOG"
   exit 1
 fi
 
 # Fetch the tarball URL for the latest release using the GitHub API
-latest_tarball_url=$(curl -s https://api.github.com/repos/Eccys/dotfiles/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
+latest_tarball_url=$(curl -s https://api.github.com/repos/Eccys/dotfiles/releases/latest | grep "tarball_url" | cut -d '"' -f 4 || true)
 
 # Check if the URL is obtained successfully
 if [[ -z "$latest_tarball_url" ]]; then
-  echo "${ERROR} Unable to fetch the tarball URL for the latest release." | tee -a "../Install-Logs/install-$(date +'%d-%H%M%S')_dotfiles.log"
+  echo "${ERROR} Unable to fetch the tarball URL for the latest release." | tee -a "$LOG"
   exit 1
 fi
 
@@ -74,6 +80,7 @@ file_name="dotfiles-${latest_tag}.tar.gz"
 
 # Download the latest release source code tarball to the current directory
 if curl -L "$latest_tarball_url" -o "$file_name"; then
+  cp -f "$file_name" dotfiles.tar.gz
   # Extract the contents of the tarball
   tar -xzf "$file_name" || exit 1
 
@@ -81,7 +88,7 @@ if curl -L "$latest_tarball_url" -o "$file_name"; then
   rm -rf Eccys-dotfiles
 
   # Identify the extracted directory
-  extracted_directory=$(tar -tf "$file_name" | grep -o '^[^/]\+' | uniq)
+  extracted_directory=$(tar -tf "$file_name" | grep -o '^[^/]\+' | uniq | head -n1)
 
   # Rename the extracted directory to Eccys-dotfiles
   mv "$extracted_directory" Eccys-dotfiles || exit 1
@@ -92,9 +99,9 @@ if curl -L "$latest_tarball_url" -o "$file_name"; then
   chmod +x copy.sh
   ./copy.sh 
 
-  echo "${OK} Latest Dotfiles release downloaded, extracted, and processed successfully. Check Eccys-dotfiles folder for more detailed install logs" | tee -a "../Install-Logs/install-$(date +'%d-%H%M%S')_dotfiles.log"
+  echo "${OK} Latest Dotfiles release downloaded, extracted, and processed successfully. Check Eccys-dotfiles folder for more detailed install logs" | tee -a "$LOG"
 else
-  echo "${ERROR} Failed to download the latest Dotfiles release." | tee -a "../Install-Logs/install-$(date +'%d-%H%M%S')_dotfiles.log"
+  echo "${ERROR} Failed to download the latest Dotfiles release." | tee -a "$LOG"
   exit 1
 fi
 
